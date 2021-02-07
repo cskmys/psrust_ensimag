@@ -1,17 +1,5 @@
 use rand::Rng;
 
-pub fn print2d(v: &Vec<Vec<i32>>){
-    let nb_rows = v.len();
-    print!("[");
-    for i in 0..nb_rows {
-        print!("{:?}", v[i]);
-        if i != nb_rows -1{
-            println!(",");
-        }
-    }
-    println!("]");
-}
-
 pub fn gen_2d_arr_rand(nb_rows:usize, nb_cols:usize, min: i32, max: i32) -> Vec<Vec<i32>>{
     let mut v= vec![vec![0;nb_cols];nb_rows];
     let mut temp = vec![0; nb_rows];
@@ -131,9 +119,3 @@ pub fn recursive_version_2d_opti(v_slice: &[Vec<i32>]) -> i32{
     }
     return cnt;
 }
-
-// use criterion::{black_box, criterion_group, criterion_main, Criterion};
-//
-// fn criterion_benchmark(c: &mut Criterion){
-//     c.bench_function("naive", |b| b.iter(|| naive_version_2d()));
-// }
