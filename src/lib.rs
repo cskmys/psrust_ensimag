@@ -1,3 +1,53 @@
+use rand::Rng;
+
+pub fn print2d(v: &Vec<Vec<i32>>){
+    let nb_rows = v.len();
+    print!("[");
+    for i in 0..nb_rows {
+        print!("{:?}", v[i]);
+        if i != nb_rows -1{
+            println!(",");
+        }
+    }
+    println!("]");
+}
+
+pub fn gen_2d_arr_rand(nb_rows:usize, nb_cols:usize, min: i32, max: i32) -> Vec<Vec<i32>>{
+    let mut v= vec![vec![0;nb_cols];nb_rows];
+    let mut temp = vec![0; nb_rows];
+    for i in 0..nb_rows {
+        temp[i] = rand::thread_rng().gen_range(min..max);
+    }
+    temp.sort();
+    temp.reverse();
+    for i in 0..nb_rows {
+        v[i][0] = temp[i];
+    }
+    for j in 1..nb_cols {
+        if v[0][j-1] == min {
+            v[0][j] = min;
+        }  else {
+            v[0][j] = rand::thread_rng().gen_range(min..v[0][j-1]);
+        }
+    }
+    for i in 1..nb_rows {
+        for j in 1..nb_cols {
+            let less;
+            if v[i][j-1] <= v[i-1][j]{
+                less = v[i][j-1];
+            } else {
+                less = v[i-1][j]
+            }
+            if less == min {
+                v[i][j] = less;
+            } else {
+                v[i][j] = rand::thread_rng().gen_range(min..less);
+            }
+        }
+    }
+    return v;
+}
+
 fn naive_version_1d(v: &[i32], nb_ele: usize) -> i32{
     let mut cnt = 0;
     for j in 0..nb_ele {
@@ -81,3 +131,9 @@ pub fn recursive_version_2d_opti(v_slice: &[Vec<i32>]) -> i32{
     }
     return cnt;
 }
+
+// use criterion::{black_box, criterion_group, criterion_main, Criterion};
+//
+// fn criterion_benchmark(c: &mut Criterion){
+//     c.bench_function("naive", |b| b.iter(|| naive_version_2d()));
+// }
