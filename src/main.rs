@@ -4,6 +4,8 @@ const N:usize = 4;
 const MIN:i32 = -100;
 const MAX:i32 = 100;
 
+mod lib;
+
 use rand::Rng;
 
 fn print2d(v: &Vec<Vec<i32>>){
@@ -52,58 +54,14 @@ fn gen_2d_arr_rand(mut v: Vec<Vec<i32>>) -> Vec<Vec<i32>>{
     return v;
 }
 
-fn naive_version_1d(v: &[i32]) -> i32{
-    let mut cnt = 0;
-    for j in 0..N{
-        if v[j] < 0 {
-            cnt = cnt + 1;
-        }
-    }
-    return cnt;
-}
-
-fn naive_version_2d(v: &[Vec<i32>]) -> i32{
-    let mut cnt = 0;
-    for i in 0..M{
-        cnt = cnt + naive_version_1d(&v[i]);
-    }
-    return cnt;
-}
-
-fn recursive_version_1d(v_slice: &[i32]) -> i32{
-    let mut cnt = 0;
-    let n = v_slice.len();
-    if n == 1 {
-        if v_slice[0] < 0 {
-            cnt = 1;
-        }
-    } else {
-        let mid = n / 2;
-        cnt = cnt + recursive_version_1d(&v_slice[0..mid]);
-        cnt = cnt + recursive_version_1d(&v_slice[mid..n]);
-    }
-    return cnt;
-}
-
-fn recursive_version_2d(v_slice: &[Vec<i32>]) -> i32{
-    let mut cnt = 0;
-    let n = v_slice.len();
-    if n == 1 {
-        cnt = cnt + recursive_version_1d(&v_slice[0]);
-    } else {
-        let mid = n / 2;
-        cnt = cnt + recursive_version_2d(&v_slice[0..mid]);
-        cnt = cnt + recursive_version_2d(&v_slice[mid..n]);
-    }
-    return cnt;
-}
-
 fn main(){
     let mut v = vec![vec![0;N];M];
     v = gen_2d_arr_rand(v);
     print2d(&v);
-    let mut c = naive_version_2d(&v);
+    let mut c = lib::naive_version_2d(&v);
     println!("c {}", c);
-    c = recursive_version_2d(&v);
+    c = lib::recursive_version_2d(&v);
+    println!("c {}", c);
+    c = lib::recursive_version_2d_opti(&v);
     println!("c {}", c);
 }
