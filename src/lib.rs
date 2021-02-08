@@ -36,7 +36,7 @@ pub fn gen_2d_arr_rand(nb_rows:usize, nb_cols:usize, min: i32, max: i32) -> Vec<
     return v;
 }
 
-fn naive_version_1d(v: &[i32], nb_ele: usize) -> i32{
+fn seq_iter_1d(v: &[i32], nb_ele: usize) -> i32{
     let mut cnt = 0;
     for j in 0..nb_ele {
         if v[j] < 0 {
@@ -46,17 +46,17 @@ fn naive_version_1d(v: &[i32], nb_ele: usize) -> i32{
     return cnt;
 }
 
-pub fn naive_version_2d(v: &[Vec<i32>]) -> i32{
+pub fn seq_iter_2d(v: &[Vec<i32>]) -> i32{
     let mut cnt = 0;
     let nb_row = v.len();
     let nb_col = v[0].len();
     for i in 0..nb_row {
-        cnt = cnt + naive_version_1d(&v[i], nb_col);
+        cnt = cnt + seq_iter_1d(&v[i], nb_col);
     }
     return cnt;
 }
 
-fn recursive_version_1d(v_slice: &[i32]) -> i32{
+fn seq_recur_1d(v_slice: &[i32]) -> i32{
     let mut cnt = 0;
     let n = v_slice.len();
     if n == 1 {
@@ -65,26 +65,26 @@ fn recursive_version_1d(v_slice: &[i32]) -> i32{
         }
     } else {
         let mid = n / 2;
-        cnt = cnt + recursive_version_1d(&v_slice[0..mid]);
-        cnt = cnt + recursive_version_1d(&v_slice[mid..n]);
+        cnt = cnt + seq_recur_1d(&v_slice[0..mid]);
+        cnt = cnt + seq_recur_1d(&v_slice[mid..n]);
     }
     return cnt;
 }
 
-pub fn recursive_version_2d(v_slice: &[Vec<i32>]) -> i32{
+pub fn seq_recur_2d(v_slice: &[Vec<i32>]) -> i32{
     let mut cnt = 0;
     let n = v_slice.len();
     if n == 1 {
-        cnt = cnt + recursive_version_1d(&v_slice[0]);
+        cnt = cnt + seq_recur_1d(&v_slice[0]);
     } else {
         let mid = n / 2;
-        cnt = cnt + recursive_version_2d(&v_slice[0..mid]);
-        cnt = cnt + recursive_version_2d(&v_slice[mid..n]);
+        cnt = cnt + seq_recur_2d(&v_slice[0..mid]);
+        cnt = cnt + seq_recur_2d(&v_slice[mid..n]);
     }
     return cnt;
 }
 
-fn recursive_version_1d_opti(v_slice: &[i32]) -> i32{
+fn seq_recur_1d_opti(v_slice: &[i32]) -> i32{
     let mut cnt = 0;
     let n = v_slice.len();
     if v_slice[0] < 0 {
@@ -93,13 +93,13 @@ fn recursive_version_1d_opti(v_slice: &[i32]) -> i32{
         cnt = 0;
     } else {
         let mid = n / 2;
-        cnt = cnt + recursive_version_1d(&v_slice[0..mid]);
-        cnt = cnt + recursive_version_1d(&v_slice[mid..n]);
+        cnt = cnt + seq_recur_1d_opti(&v_slice[0..mid]);
+        cnt = cnt + seq_recur_1d_opti(&v_slice[mid..n]);
     }
     return cnt;
 }
 
-pub fn recursive_version_2d_opti(v_slice: &[Vec<i32>]) -> i32{
+pub fn seq_recur_2d_opti(v_slice: &[Vec<i32>]) -> i32{
     let mut cnt = 0;
     let m = v_slice.len();
     let n = v_slice[0].len();
@@ -109,12 +109,12 @@ pub fn recursive_version_2d_opti(v_slice: &[Vec<i32>]) -> i32{
         cnt = 0;
     } else {
         if m == 1 {
-            cnt = cnt + recursive_version_1d_opti(&v_slice[0]);
+            cnt = cnt + seq_recur_1d_opti(&v_slice[0]);
             // cnt = cnt + recursive_version_1d_opti(&v_slice[0]);
         } else {
             let mid = m / 2;
-            cnt = cnt + recursive_version_2d_opti(&v_slice[0..mid]);
-            cnt = cnt + recursive_version_2d_opti(&v_slice[mid..m]);
+            cnt = cnt + seq_recur_2d_opti(&v_slice[0..mid]);
+            cnt = cnt + seq_recur_2d_opti(&v_slice[mid..m]);
         }
     }
     return cnt;
