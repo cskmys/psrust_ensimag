@@ -8,13 +8,13 @@ edition = "2018"
 
 [dependencies]
 rand = "*"
-#rayon = "*"
-rayon={git="https://github.com/wagnerf42/rayon", branch="tracing"}
 fast-tracer={git="https://github.com/wagnerf42/fast-tracer"}
+rayon = "*"
+#rayon={git="https://github.com/wagnerf42/rayon", branch="tracing"}
 
-#[dev-dependencies]
-#criterion = "*"
-#
-#[[bench]]
-#name = "benchmark"
-#harness = false
+[dev-dependencies]
+criterion = "*"
+
+[[bench]]
+name = "benchmark"
+harness = false

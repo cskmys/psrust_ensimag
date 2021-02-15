@@ -52,7 +52,7 @@ fn run_func_lev(v: &[Vec<i32>], lev:i32, fil_nam: String, f: &dyn Fn(&[Vec<i32>]
 }
 
 fn main(){
-    let tracer = true;
+    let tracer = false;
     let v:Vec<Vec<i32>>;
     let lev;
 
