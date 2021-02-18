@@ -1,2 +1,5 @@
 /target
 /.idea
+/rpt/*
+!/rpt/bckp
+/rpt/*.tex

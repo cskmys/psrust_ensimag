@@ -58,52 +58,45 @@ fn main(){
 
     if tracer == true {
         lev = 3;
-        v = lib::gen_2d_arr_rand(64, 64, -1000, 1000);
+        v = lib::gen_2d_arr_rand(64, 64, -100, 100);
         print2d(&v);
     } else {
         lev = 8;
-        v = lib::gen_2d_arr_rand(1024, 1024, -1000, 1000);
+        // v = lib::gen_2d_arr_rand(1024, 1024, -1000, 1000);
+        v = lib::gen_2d_arr_uni(1024, 1024);
     }
 
     let mut res = vec![0];
     res.pop();
 
 
-    res.push(run_func(&v,"seq_iter_2d".parse().unwrap(), &lib::seq_iter_2d, tracer));
+    res.push(run_func(&v, "iter_seq_2d".parse().unwrap(), &lib::iter_seq_2d, tracer));
 
-    res.push(run_func(&v,"seq_iter_2d_opti".parse().unwrap(), &lib::seq_iter_2d_opti, tracer));
+    res.push(run_func(&v, "iter_seq_2d_opti".parse().unwrap(), &lib::iter_seq_2d_opti, tracer));
 
-    res.push(run_func(&v,"seq_recur_2d".parse().unwrap(), &lib::seq_recur_2d, tracer));
+    res.push(run_func(&v, "iter_par_2d".parse().unwrap(), &lib::iter_par_2d, tracer));
 
-    res.push(run_func(&v,"seq_recur_2d_opti".parse().unwrap(), &lib::seq_recur_2d_opti, tracer));
+    res.push(run_func(&v, "iter_par_2d_opti".parse().unwrap(), &lib::iter_par_2d_opti, tracer));
 
-    res.push(run_func_lev(&v, lev,"seq_recur_lev_2d".parse().unwrap(), &lib::seq_recur_lev_2d, tracer));
+    res.push(run_func(&v, "iter_hyb_2d".parse().unwrap(), &lib::iter_hyb_2d, tracer));
 
-    res.push(run_func_lev(&v, lev,"seq_recur_lev_2d_opti".parse().unwrap(), &lib::seq_recur_lev_2d_opti, tracer));
+    res.push(run_func(&v, "iter_hyb_2d_opti".parse().unwrap(), &lib::iter_hyb_2d_opti, tracer));
 
-    res.push(run_func(&v,"par_iter_2d".parse().unwrap(), &lib::par_iter_2d, tracer));
+    res.push(run_func(&v, "recur_seq_2d".parse().unwrap(), &lib::recur_seq_2d, tracer));
 
-    res.push(run_func(&v,"par_iter_2d_opti".parse().unwrap(), &lib::par_iter_2d_opti, tracer));
+    res.push(run_func(&v, "recur_seq_2d_opti".parse().unwrap(), &lib::recur_seq_2d_opti, tracer));
 
-    res.push(run_func(&v,"par_recur_2d".parse().unwrap(), &lib::par_recur_2d, tracer));
+    res.push(run_func(&v, "recur_par_2d".parse().unwrap(), &lib::recur_par_2d, tracer));
 
-    res.push(run_func(&v,"par_recur_2d_opti".parse().unwrap(), &lib::par_recur_2d_opti, tracer));
+    res.push(run_func(&v, "recur_par_2d_opti".parse().unwrap(), &lib::recur_par_2d_opti, tracer));
 
-    res.push(run_func_lev(&v, lev,"par_recur_lev_2d".parse().unwrap(), &lib::par_recur_lev_2d, tracer));
+    res.push(run_func(&v, "recur_hyb_2d".parse().unwrap(), &lib::recur_hyb_2d, tracer));
 
-    res.push(run_func_lev(&v, lev,"par_recur_lev_2d_opti".parse().unwrap(), &lib::par_recur_lev_2d_opti, tracer));
+    res.push(run_func(&v, "recur_hyb_2d_opti".parse().unwrap(), &lib::recur_hyb_2d_opti, tracer));
 
-    res.push(run_func(&v,"hyb_iter_2d".parse().unwrap(), &lib::hyb_iter_2d, tracer));
+    res.push(run_func_lev(&v, lev, "recur_cwd_2d".parse().unwrap(), &lib::recur_cwd_2d, tracer));
 
-    res.push(run_func(&v,"hyb_iter_2d_opti".parse().unwrap(), &lib::hyb_iter_2d_opti, tracer));
-
-    res.push(run_func(&v,"hyb_recur_2d".parse().unwrap(), &lib::hyb_recur_2d, tracer));
-
-    res.push(run_func(&v,"hyb_recur_2d_opti".parse().unwrap(), &lib::hyb_recur_2d_opti, tracer));
-
-    res.push(run_func_lev(&v, lev,"hyb_recur_lev_2d".parse().unwrap(), &lib::hyb_recur_lev_2d, tracer));
-
-    res.push(run_func_lev(&v, lev,"hyb_recur_lev_2d_opti".parse().unwrap(), &lib::hyb_recur_lev_2d_opti, tracer));
+    res.push(run_func_lev(&v, lev, "recur_cwd_2d_opti".parse().unwrap(), &lib::recur_cwd_2d_opti, tracer));
 
     if res.windows(2).all(|w| w[0] == w[1]) == false {
         println!("res: {:?}", res);

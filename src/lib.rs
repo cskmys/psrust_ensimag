@@ -1,4 +1,6 @@
 use rand::Rng;
+use rayon::prelude::*;
+use rayon::join;
 
 pub fn gen_2d_arr_rand(nb_rows:usize, nb_cols:usize, min: i32, max: i32) -> Vec<Vec<i32>>{
     let mut v= vec![vec![0;nb_cols];nb_rows];
@@ -36,15 +38,25 @@ pub fn gen_2d_arr_rand(nb_rows:usize, nb_cols:usize, min: i32, max: i32) -> Vec<
     return v;
 }
 
-fn seq_iter_1d(v: &[i32]) -> i32{
+pub fn gen_2d_arr_uni(nb_rows:usize, nb_cols:usize) -> Vec<Vec<i32>>{
+    let mut v= vec![vec![0;nb_cols];nb_rows];
+    for i in (nb_rows / 2)..nb_rows {
+        for j in (nb_cols / 2)..nb_cols {
+            v[i][j] = -1;
+        }
+    }
+    return v;
+}
+
+fn iter_seq_1d(v: &[i32]) -> i32{
     v.iter().filter(|&e| *e < 0).count() as i32
 }
 
-pub fn seq_iter_2d(v: &[Vec<i32>]) -> i32{
-    v.iter().map(| e| seq_iter_1d(e)).sum()
+pub fn iter_seq_2d(v: &[Vec<i32>]) -> i32{
+    v.iter().map(| e| iter_seq_1d(e)).sum()
 }
 
-fn seq_iter_1d_opti(v: &[i32]) -> i32{
+fn iter_seq_1d_opti(v: &[i32]) -> i32{
     let nb_ele = v.len();
     if v[0] < 0 {
         nb_ele as i32
@@ -55,7 +67,7 @@ fn seq_iter_1d_opti(v: &[i32]) -> i32{
     }
 }
 
-pub fn seq_iter_2d_opti(v: &[Vec<i32>]) -> i32{
+pub fn iter_seq_2d_opti(v: &[Vec<i32>]) -> i32{
     let nb_rows = v.len();
     let nb_cols = v[0].len();
     if v[0][0] < 0{
@@ -63,139 +75,19 @@ pub fn seq_iter_2d_opti(v: &[Vec<i32>]) -> i32{
     } else if v[nb_rows -1][nb_cols -1] >= 0 {
         0
     } else {
-        v.iter().map(|e| seq_iter_1d_opti(e)).sum()
+        v.iter().map(|e| iter_seq_1d_opti(e)).sum()
     }
 }
 
-fn seq_recur_1d(v_slice: &[i32]) -> i32{
-    let n = v_slice.len();
-    if n == 1 {
-        if v_slice[0] < 0 {
-            1
-        } else {
-            0
-        }
-    } else {
-        let mid = n / 2;
-        seq_recur_1d(&v_slice[0..mid]) + seq_recur_1d(&v_slice[mid..n])
-    }
-}
-
-pub fn seq_recur_2d(v_slice: &[Vec<i32>]) -> i32{
-    let n = v_slice.len();
-    if n == 1 {
-        seq_recur_1d(&v_slice[0])
-    } else {
-        let mid = n / 2;
-        seq_recur_2d(&v_slice[0..mid]) + seq_recur_2d(&v_slice[mid..n])
-    }
-}
-
-fn seq_recur_1d_opti(v_slice: &[i32]) -> i32{
-    let nb_ele = v_slice.len();
-    if v_slice[0] < 0 {
-        nb_ele as i32
-    } else if v_slice[nb_ele -1] >= 0 {
-        0
-    } else {
-        if nb_ele == 1 {
-            if v_slice[0] < 0 {
-                1
-            } else {
-                0
-            }
-        } else {
-            let mid = nb_ele / 2;
-            seq_recur_1d_opti(&v_slice[0..mid]) + seq_recur_1d_opti(&v_slice[mid..nb_ele])
-        }
-    }
-}
-
-pub fn seq_recur_2d_opti(v_slice: &[Vec<i32>]) -> i32{
-    let nb_rows = v_slice.len();
-    let nb_cols = v_slice[0].len();
-    if v_slice[0][0] < 0{
-        (nb_cols * nb_rows) as i32
-    } else if v_slice[nb_rows -1][nb_cols -1] >= 0 {
-        0
-    } else {
-        if nb_rows == 1 {
-            seq_recur_1d_opti(&v_slice[0])
-        } else {
-            let mid = nb_rows / 2;
-            seq_recur_2d_opti(&v_slice[0..mid]) + seq_recur_2d_opti(&v_slice[mid..nb_rows])
-        }
-    }
-}
-
-fn seq_recur_lev_1d(v_slice: &[i32], lev:i32) -> i32{
-    let n = v_slice.len();
-    if lev == 0 {
-        seq_iter_1d(v_slice)
-    } else if n == 1 {
-        if v_slice[0] < 0 {
-            1
-        } else {
-            0
-        }
-    } else {
-        let mid = n / 2;
-        seq_recur_lev_1d(&v_slice[0..mid], lev - 1) + seq_recur_lev_1d(&v_slice[mid..n], lev - 1)
-    }
-}
-
-pub fn seq_recur_lev_2d(v_slice: &[Vec<i32>], lev:i32) -> i32{
-    let n = v_slice.len();
-    if lev == 0 {
-        seq_iter_2d(v_slice)
-    } else if n == 1 {
-        seq_recur_lev_1d(&v_slice[0], lev - 1)
-    } else {
-        let mid = n / 2;
-        seq_recur_lev_2d(&v_slice[0..mid], lev - 1) + seq_recur_lev_2d(&v_slice[mid..n], lev - 1)
-    }
-}
-
-fn seq_recur_lev_1d_opti(v_slice: &[i32], lev:i32) -> i32{
-    let n = v_slice.len();
-    if lev == 0 {
-        seq_iter_1d_opti(v_slice)
-    } else if n == 1 {
-        if v_slice[0] < 0 {
-            1
-        } else {
-            0
-        }
-    } else {
-        let mid = n / 2;
-        seq_recur_lev_1d_opti(&v_slice[0..mid], lev - 1) + seq_recur_lev_1d_opti(&v_slice[mid..n], lev - 1)
-    }
-}
-
-pub fn seq_recur_lev_2d_opti(v_slice: &[Vec<i32>], lev:i32) -> i32{
-    let n = v_slice.len();
-    if lev == 0 {
-        seq_iter_2d_opti(v_slice)
-    } else if n == 1 {
-        seq_recur_lev_1d_opti(&v_slice[0], lev - 1)
-    } else {
-        let mid = n / 2;
-        seq_recur_lev_2d_opti(&v_slice[0..mid], lev - 1) + seq_recur_lev_2d_opti(&v_slice[mid..n], lev - 1)
-    }
-}
-
-use rayon::prelude::*;
-use rayon::join;
-
-fn par_iter_1d(v: &[i32]) -> i32{
+fn iter_par_1d(v: &[i32]) -> i32{
     v.par_iter().filter(| &e | *e < 0).count() as i32
 }
 
-pub fn par_iter_2d(v: &[Vec<i32>]) -> i32{
-    v.par_iter().map(|e| par_iter_1d(e)).sum()
+pub fn iter_par_2d(v: &[Vec<i32>]) -> i32{
+    v.par_iter().map(|e| iter_par_1d(e)).sum()
 }
 
-fn par_iter_1d_opti(v: &[i32]) -> i32{
+fn iter_par_1d_opti(v: &[i32]) -> i32{
     let nb_ele = v.len();
     if v[0] < 0 {
         nb_ele as i32
@@ -206,7 +98,7 @@ fn par_iter_1d_opti(v: &[i32]) -> i32{
     }
 }
 
-pub fn par_iter_2d_opti(v: &[Vec<i32>]) -> i32{
+pub fn iter_par_2d_opti(v: &[Vec<i32>]) -> i32{
     let nb_rows = v.len();
     let nb_cols = v[0].len();
     if v[0][0] < 0{
@@ -214,11 +106,80 @@ pub fn par_iter_2d_opti(v: &[Vec<i32>]) -> i32{
     } else if v[nb_rows -1][nb_cols -1] >= 0 {
         0
     } else {
-        v.par_iter().map(|e| par_iter_1d_opti(e)).sum()
+        v.par_iter().map(|e| iter_par_1d_opti(e)).sum()
     }
 }
 
-fn par_recur_1d(v_slice: &[i32]) -> i32{
+pub fn iter_hyb_2d(v: &[Vec<i32>]) -> i32{
+    v.par_iter().map(| e | iter_seq_1d(e)).sum()
+}
+
+pub fn iter_hyb_2d_opti(v: &[Vec<i32>]) -> i32{
+    v.par_iter().map(| e | recur_seq_1d_opti(e)).sum()
+}
+
+fn recur_seq_1d(v_slice: &[i32]) -> i32{
+    let n = v_slice.len();
+    if n == 1 {
+        if v_slice[0] < 0 {
+            1
+        } else {
+            0
+        }
+    } else {
+        let mid = n / 2;
+        recur_seq_1d(&v_slice[0..mid]) + recur_seq_1d(&v_slice[mid..n])
+    }
+}
+
+pub fn recur_seq_2d(v_slice: &[Vec<i32>]) -> i32{
+    let n = v_slice.len();
+    if n == 1 {
+        recur_seq_1d(&v_slice[0])
+    } else {
+        let mid = n / 2;
+        recur_seq_2d(&v_slice[0..mid]) + recur_seq_2d(&v_slice[mid..n])
+    }
+}
+
+fn recur_seq_1d_opti(v_slice: &[i32]) -> i32{
+    let nb_ele = v_slice.len();
+    if v_slice[0] < 0 {
+        nb_ele as i32
+    } else if v_slice[nb_ele -1] >= 0 {
+        0
+    } else {
+        if nb_ele == 1 {
+            if v_slice[0] < 0 {
+                1
+            } else {
+                0
+            }
+        } else {
+            let mid = nb_ele / 2;
+            recur_seq_1d_opti(&v_slice[0..mid]) + recur_seq_1d_opti(&v_slice[mid..nb_ele])
+        }
+    }
+}
+
+pub fn recur_seq_2d_opti(v_slice: &[Vec<i32>]) -> i32{
+    let nb_rows = v_slice.len();
+    let nb_cols = v_slice[0].len();
+    if v_slice[0][0] < 0{
+        (nb_cols * nb_rows) as i32
+    } else if v_slice[nb_rows -1][nb_cols -1] >= 0 {
+        0
+    } else {
+        if nb_rows == 1 {
+            recur_seq_1d_opti(&v_slice[0])
+        } else {
+            let mid = nb_rows / 2;
+            recur_seq_2d_opti(&v_slice[0..mid]) + recur_seq_2d_opti(&v_slice[mid..nb_rows])
+        }
+    }
+}
+
+fn recur_par_1d(v_slice: &[i32]) -> i32{
     let n = v_slice.len();
     if n == 1 {
         if v_slice[0] < 0 {
@@ -230,25 +191,25 @@ fn par_recur_1d(v_slice: &[i32]) -> i32{
         let mid = n / 2;
         let mut a:i32 = 0;
         let mut b:i32 = 0;
-        join(|| a = par_recur_1d(&v_slice[0..mid]), || b = par_recur_1d(&v_slice[mid..n]));
+        join(|| a = recur_par_1d(&v_slice[0..mid]), || b = recur_par_1d(&v_slice[mid..n]));
         a + b
     }
 }
 
-pub fn par_recur_2d(v_slice: &[Vec<i32>]) -> i32{
+pub fn recur_par_2d(v_slice: &[Vec<i32>]) -> i32{
     let n = v_slice.len();
     if n == 1 {
-        par_recur_1d(&v_slice[0])
+        recur_par_1d(&v_slice[0])
     } else {
         let mid = n / 2;
         let mut a:i32 = 0;
         let mut b:i32 = 0;
-        join(|| a = par_recur_2d(&v_slice[0..mid]), || b = par_recur_2d(&v_slice[mid..n]));
+        join(|| a = recur_par_2d(&v_slice[0..mid]), || b = recur_par_2d(&v_slice[mid..n]));
         a + b
     }
 }
 
-fn par_recur_1d_opti(v_slice: &[i32]) -> i32{
+fn recur_par_1d_opti(v_slice: &[i32]) -> i32{
     let nb_ele = v_slice.len();
     if v_slice[0] < 0 {
         nb_ele as i32
@@ -265,13 +226,13 @@ fn par_recur_1d_opti(v_slice: &[i32]) -> i32{
             let mid = nb_ele / 2;
             let mut a: i32 = 0;
             let mut b: i32 = 0;
-            join(|| a = par_recur_1d_opti(&v_slice[0..mid]), || b = par_recur_1d_opti(&v_slice[mid..nb_ele]));
+            join(|| a = recur_par_1d_opti(&v_slice[0..mid]), || b = recur_par_1d_opti(&v_slice[mid..nb_ele]));
             a + b
         }
     }
 }
 
-pub fn par_recur_2d_opti(v_slice: &[Vec<i32>]) -> i32{
+pub fn recur_par_2d_opti(v_slice: &[Vec<i32>]) -> i32{
     let nb_rows = v_slice.len();
     let nb_cols = v_slice[0].len();
     if v_slice[0][0] < 0{
@@ -280,52 +241,66 @@ pub fn par_recur_2d_opti(v_slice: &[Vec<i32>]) -> i32{
         0
     } else {
         if nb_rows == 1 {
-            par_recur_1d_opti(&v_slice[0])
+            recur_par_1d_opti(&v_slice[0])
         } else {
             let mid = nb_rows / 2;
             let mut a: i32 = 0;
             let mut b: i32 = 0;
-            join(|| a = par_recur_2d_opti(&v_slice[0..mid]), || b = par_recur_2d_opti(&v_slice[mid..nb_rows]));
+            join(|| a = recur_par_2d_opti(&v_slice[0..mid]), || b = recur_par_2d_opti(&v_slice[mid..nb_rows]));
             a + b
         }
     }
 }
 
-fn par_recur_lev_1d(v_slice: &[i32], lev:i32) -> i32{
+pub fn recur_hyb_2d(v_slice: &[Vec<i32>]) -> i32{
     let n = v_slice.len();
-    if lev == 0 {
-        par_iter_1d(v_slice)
-    } else if n == 1 {
-        if v_slice[0] < 0 {
-            1
+    if n == 1 {
+        recur_seq_1d(&v_slice[0])
+    } else {
+        let mid = n / 2;
+        let mut a:i32 = 0;
+        let mut b:i32 = 0;
+        join(|| a = recur_hyb_2d(&v_slice[0..mid]), || b = recur_hyb_2d(&v_slice[mid..n]));
+        a + b
+    }
+}
+
+pub fn recur_hyb_2d_opti(v_slice: &[Vec<i32>]) -> i32{
+    let nb_rows = v_slice.len();
+    let nb_cols = v_slice[0].len();
+    if v_slice[0][0] < 0{
+        (nb_cols * nb_rows) as i32
+    } else if v_slice[nb_rows -1][nb_cols -1] >= 0 {
+        0
+    } else {
+        if nb_rows == 1 {
+            recur_seq_1d_opti(&v_slice[0])
         } else {
-            0
+            let mid = nb_rows / 2;
+            let mut a: i32 = 0;
+            let mut b: i32 = 0;
+            join(|| a = recur_hyb_2d_opti(&v_slice[0..mid]), || b = recur_hyb_2d_opti(&v_slice[mid..nb_rows]));
+            a + b
         }
-    } else {
-        let mid = n / 2;
-        let mut a:i32 = 0;
-        let mut b:i32 = 0;
-        join(|| a = par_recur_lev_1d(&v_slice[0..mid], lev - 1), || b = par_recur_lev_1d(&v_slice[mid..n], lev - 1));
-        a + b
     }
 }
 
-pub fn par_recur_lev_2d(v_slice: &[Vec<i32>], lev:i32) -> i32{
+pub fn recur_cwd_2d(v_slice: &[Vec<i32>], lev:i32) -> i32{
     let n = v_slice.len();
     if lev == 0 {
-        par_iter_2d(v_slice)
-    } else if n == 1{
-        par_recur_lev_1d(&v_slice[0], lev)
+        iter_seq_2d(v_slice)
+    } else if n == 1 {
+        iter_seq_1d(&v_slice[0])
     } else {
         let mid = n / 2;
         let mut a:i32 = 0;
         let mut b:i32 = 0;
-        join(|| a = par_recur_lev_2d(&v_slice[0..mid], lev - 1), || b = par_recur_lev_2d(&v_slice[mid..n], lev - 1));
+        join(|| a = recur_cwd_2d(&v_slice[0..mid], lev - 1), || b = recur_cwd_2d(&v_slice[mid..n], lev - 1));
         a + b
     }
 }
 
-fn par_recur_lev_1d_opti(v_slice: &[i32], lev:i32) -> i32{
+fn recur_cwd_1d_opti(v_slice: &[i32], lev:i32) -> i32{
     let nb_ele = v_slice.len();
     if v_slice[0] < 0 {
         nb_ele as i32
@@ -333,7 +308,7 @@ fn par_recur_lev_1d_opti(v_slice: &[i32], lev:i32) -> i32{
         0
     } else {
         if lev == 0 {
-            par_iter_1d_opti(v_slice)
+            recur_seq_1d_opti(&v_slice)
         } else if nb_ele == 1 {
             if v_slice[0] < 0 {
                 1
@@ -344,13 +319,13 @@ fn par_recur_lev_1d_opti(v_slice: &[i32], lev:i32) -> i32{
             let mid = nb_ele / 2;
             let mut a: i32 = 0;
             let mut b: i32 = 0;
-            join(|| a = par_recur_lev_1d_opti(&v_slice[0..mid], lev - 1), || b = par_recur_lev_1d_opti(&v_slice[mid..nb_ele], lev - 1));
+            join(|| a = recur_cwd_1d_opti(&v_slice[0..mid], lev -1), || b = recur_cwd_1d_opti(&v_slice[mid..nb_ele], lev -1));
             a + b
         }
     }
 }
 
-pub fn par_recur_lev_2d_opti(v_slice: &[Vec<i32>], lev:i32) -> i32{
+pub fn recur_cwd_2d_opti(v_slice: &[Vec<i32>], lev:i32) -> i32{
     let nb_rows = v_slice.len();
     let nb_cols = v_slice[0].len();
     if v_slice[0][0] < 0{
@@ -359,92 +334,14 @@ pub fn par_recur_lev_2d_opti(v_slice: &[Vec<i32>], lev:i32) -> i32{
         0
     } else {
         if lev == 0 {
-            par_iter_2d_opti(v_slice)
+            recur_seq_2d_opti(v_slice)
         } else if nb_rows == 1 {
-            par_recur_lev_1d_opti(&v_slice[0], lev)
+            recur_cwd_1d_opti(&v_slice[0], lev - 1)
         } else {
             let mid = nb_rows / 2;
             let mut a: i32 = 0;
             let mut b: i32 = 0;
-            join(|| a = par_recur_lev_2d_opti(&v_slice[0..mid], lev - 1), || b = par_recur_lev_2d_opti(&v_slice[mid..nb_rows], lev - 1));
-            a + b
-        }
-    }
-}
-
-pub fn hyb_iter_2d(v: &[Vec<i32>]) -> i32{
-    v.par_iter().map(| e | seq_iter_1d(e)).sum()
-}
-
-pub fn hyb_iter_2d_opti(v: &[Vec<i32>]) -> i32{
-    v.par_iter().map(| e | seq_recur_1d_opti(e)).sum()
-}
-
-pub fn hyb_recur_2d(v_slice: &[Vec<i32>]) -> i32{
-    let n = v_slice.len();
-    if n == 1 {
-        seq_recur_1d(&v_slice[0])
-    } else {
-        let mid = n / 2;
-        let mut a:i32 = 0;
-        let mut b:i32 = 0;
-        join(|| a = hyb_recur_2d(&v_slice[0..mid]), || b = hyb_recur_2d(&v_slice[mid..n]));
-        a + b
-    }
-}
-
-pub fn hyb_recur_2d_opti(v_slice: &[Vec<i32>]) -> i32{
-    let nb_rows = v_slice.len();
-    let nb_cols = v_slice[0].len();
-    if v_slice[0][0] < 0{
-        (nb_cols * nb_rows) as i32
-    } else if v_slice[nb_rows -1][nb_cols -1] >= 0 {
-        0
-    } else {
-        if nb_rows == 1 {
-            seq_recur_1d_opti(&v_slice[0])
-        } else {
-            let mid = nb_rows / 2;
-            let mut a: i32 = 0;
-            let mut b: i32 = 0;
-            join(|| a = hyb_recur_2d_opti(&v_slice[0..mid]), || b = hyb_recur_2d_opti(&v_slice[mid..nb_rows]));
-            a + b
-        }
-    }
-}
-
-pub fn hyb_recur_lev_2d(v_slice: &[Vec<i32>], lev:i32) -> i32{
-    let n = v_slice.len();
-    if lev == 0 {
-        hyb_iter_2d(v_slice)
-    } else if n == 1 {
-        seq_iter_1d(&v_slice[0])
-    } else {
-        let mid = n / 2;
-        let mut a:i32 = 0;
-        let mut b:i32 = 0;
-        join(|| a = hyb_recur_lev_2d(&v_slice[0..mid], lev - 1), || b = hyb_recur_lev_2d(&v_slice[mid..n], lev - 1));
-        a + b
-    }
-}
-
-pub fn hyb_recur_lev_2d_opti(v_slice: &[Vec<i32>], lev:i32) -> i32{
-    let nb_rows = v_slice.len();
-    let nb_cols = v_slice[0].len();
-    if v_slice[0][0] < 0{
-        (nb_cols * nb_rows) as i32
-    } else if v_slice[nb_rows -1][nb_cols -1] >= 0 {
-        0
-    } else {
-        if lev == 0 {
-            hyb_iter_2d_opti(v_slice)
-        } else if nb_rows == 1 {
-            seq_recur_1d_opti(&v_slice[0])
-        } else {
-            let mid = nb_rows / 2;
-            let mut a: i32 = 0;
-            let mut b: i32 = 0;
-            join(|| a = hyb_recur_lev_2d_opti(&v_slice[0..mid], lev - 1), || b = hyb_recur_lev_2d_opti(&v_slice[mid..nb_rows], lev - 1));
+            join(|| a = recur_cwd_2d_opti(&v_slice[0..mid], lev - 1), || b = recur_cwd_2d_opti(&v_slice[mid..nb_rows], lev - 1));
             a + b
         }
     }

@@ -1,0 +1,45 @@
+<svg version='1.1' viewBox='0 0 1920 1080' xmlns='http://www.w3.org/2000/svg'>
+<rect width='1920' height='540' x='0' y='270' fill='black'/>
+<rect class="task12455275919615065002" id="0" width='0' height='540' x='0' y='270' fill='red'>
+<animate attributeType="XML" attributeName="width" from="0" to="1920" begin="0ms" dur="30000ms" fill="freeze"/>
+</rect>
+<g id="tip_12455275919615065002_0">
+<rect x="1520" y="1000" width="300" height="50" fill="white" stroke="black"/>
+<text x="1525" y="1020">start 0 end 174244</text>
+<text x="1525" y="1040">duration 174.24us</text>
+</g>
+
+   <style>
+      .task-highlight {
+        fill: #ec008c;
+        opacity: 1;
+      }
+    </style>
+  <script><![CDATA[
+
+    displayTips();
+
+    function displayTips() {
+        let tasks = document.getElementsByClassName('task12455275919615065002');
+        for (let i = 0; i < tasks.length ; i++) {
+          let task = tasks[i];
+          let tip_id = task.id;
+          let tip = document.getElementById('tip_12455275919615065002_'+tip_id);
+          tip.style.display='none';
+          tasks[i].tip = tip;
+          tasks[i].addEventListener('mouseover', mouseOverEffect);
+          tasks[i].addEventListener('mouseout', mouseOutEffect);
+        }
+    }
+
+    function mouseOverEffect() {
+      this.classList.add("task-highlight");
+      this.tip.style.display='block';
+    }
+
+    function mouseOutEffect() {
+      this.classList.remove("task-highlight");
+      this.tip.style.display='none';
+    }
+  ]]></script>
+</svg>
